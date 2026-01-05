@@ -1,0 +1,28 @@
+name: DevOps January CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # A. Récupérer le code du dépôt
+      - name: Checkout code
+        uses: actions/checkout@v4
+  
+      # B. Vérifier la syntaxe du script Bash (Linting)
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './scripts'
+
+      # C. Tester si le Dockerfile est valide en buildant l'image
+      - name: Build Docker Image
+        run: |
+          docker build -t uptime-checker:test .
+          echo "L'image a été construite avec succès sur GitHub !"
