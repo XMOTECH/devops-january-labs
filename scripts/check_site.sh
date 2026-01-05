@@ -19,7 +19,7 @@ CODE_HTTP=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
 DATE=$(date "+%Y-%m-%d %H:%M:%S")
 
 # 5. Logique de décision
-if [ "$CODE_HTTP" -eq 200 ]; then
+if ["$CODE_HTTP" -eq 200 ]; then
     RESULT=" [OK] Le site $URL répond bien (Code: $CODE_HTTP)"
 else
     RESULT=" [ALERTE] Le site $URL est en panne ou inaccessible (Code: $CODE_HTTP)"
