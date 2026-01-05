@@ -1,18 +1,16 @@
 services:
+  # Ton ancien service de monitoring
   checker:
     build: .
     image: uptime-checker:latest
     volumes:
       - ./logs:/logs
-    environment:
-      - LOG_FILE=/logs/compose_results.log
-    command: ["https://www.github.com"]
+    command: ["https://www.google.com"]
 
-  # On ajoute un deuxième service pour montrer la puissance de Compose
-  checker-wiki:
-    image: uptime-checker:latest
+  # Ton nouveau service Web
+  webapp:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
     volumes:
-      - ./logs:/logs
-    environment:
-      - LOG_FILE=/logs/wiki_results.log
-    command: ["https://www.wikipedia.org"]
+      - ./html:/usr/share/nginx/html
