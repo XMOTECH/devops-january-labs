@@ -1,0 +1,18 @@
+services:
+  checker:
+    build: .
+    image: uptime-checker:latest
+    volumes:
+      - ./logs:/logs
+    environment:
+      - LOG_FILE=/logs/compose_results.log
+    command: ["https://www.github.com"]
+
+  # On ajoute un deuxième service pour montrer la puissance de Compose
+  checker-wiki:
+    image: uptime-checker:latest
+    volumes:
+      - ./logs:/logs
+    environment:
+      - LOG_FILE=/logs/wiki_results.log
+    command: ["https://www.wikipedia.org"]
