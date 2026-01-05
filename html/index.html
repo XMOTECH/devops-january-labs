@@ -1,1 +1,376 @@
-<h1>Lab DevOps de XMOTECH</h1>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fundamentaux DevOps – Tutoriel complet</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --accent: #22c55e;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --code-bg: #0b1021;
+      --code-border: #1f2937;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      background: linear-gradient(180deg, #0b1021 0%, var(--bg) 100%);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      padding: 48px 24px;
+      text-align: center;
+      background: radial-gradient(1200px 400px at 50% -20%, #1d2b68 0%, transparent 60%);
+      border-bottom: 1px solid #1f2937;
+    }
+    header h1 { margin: 0 0 8px; font-size: 2rem; letter-spacing: 0.2px; }
+    header p { margin: 0; color: var(--muted); }
+    .container { max-width: 980px; margin: 0 auto; padding: 24px; }
+    .panel {
+      background: var(--panel);
+      border: 1px solid #1f2937;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+    h2 { margin: 8px 0 14px; font-size: 1.35rem; }
+    h3 { margin: 16px 0 8px; font-size: 1.05rem; color: #cbd5e1; }
+    ul { padding-left: 18px; }
+    li { margin: 4px 0; }
+    .badge {
+      display: inline-block;
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      margin: 6px 0 12px;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--code-border);
+      border-radius: 12px;
+      padding: 14px;
+      overflow-x: auto;
+      margin: 12px 0;
+    }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 30px 0 60px;
+    }
+    a { color: #60a5fa; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Fundamentaux DevOps – Tutoriel</h1>
+    <p>Culture, outillage, automatisation, observabilité et sécurité — un guide pratique pour démarrer.</p>
+  </header>
+
+  <main class="container">
+    <section class="panel">
+      <span class="badge">Vue d’ensemble</span>
+      <h2>Qu’est-ce que DevOps</h2>
+      <p>DevOps est une approche qui rapproche développement et opérations pour livrer plus vite, avec qualité et fiabilité. Ça repose sur l’automatisation, la collaboration, l’observabilité, l’Infrastructure as Code, et des boucles de feedback courtes.</p>
+      <ul>
+        <li><strong>Objectif:</strong> réduire le délai entre l’idée et la mise en production.</li>
+        <li><strong>Leviers:</strong> CI/CD, conteneurs, IaC, tests, monitoring.</li>
+        <li><strong>Résultats:</strong> déploiements fréquents, incidents réduits, MTTR plus court.</li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <span class="badge">Bases essentielles</span>
+      <h2>Principes clés</h2>
+      <div class="grid">
+        <div>
+          <h3>Versionnement (Git)</h3>
+          <ul>
+            <li><strong>Branches:</strong> main/trunk + feature branches.</li>
+            <li><strong>Commits:</strong> petits, atomiques, messages clairs.</li>
+            <li><strong>Pull requests:</strong> revue + checks automatisés.</li>
+          </ul>
+          <pre><code># Initialiser et pousser
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin git@github.com:ORG/REPO.git
+git push -u origin main</code></pre>
+        </div>
+        <div>
+          <h3>CI/CD</h3>
+          <ul>
+            <li><strong>CI:</strong> build + tests à chaque push.</li>
+            <li><strong>CD:</strong> déploiement automatisé et reproductible.</li>
+            <li><strong>Gatekeeping:</strong> qualité avant merge (lint, tests, SAST).</li>
+          </ul>
+          <pre><code># .github/workflows/ci.yml
+name: CI
+on: [push, pull_request]
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci
+      - run: npm test -- --ci</code></pre>
+        </div>
+        <div>
+          <h3>Conteneurs</h3>
+          <ul>
+            <li><strong>Isolation:</strong> même runtime partout.</li>
+            <li><strong>Images immuables:</strong> déploiements identiques.</li>
+            <li><strong>Registry:</strong> stockage/partage des images.</li>
+          </ul>
+          <pre><code># Dockerfile minimal
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json .
+RUN npm ci --only=production
+COPY . .
+CMD ["node", "server.js"]</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <span class="badge">Infrastructure as Code</span>
+      <h2>IaC et configuration</h2>
+      <p>Décris ton infra dans des fichiers, versionne, teste et applique automatiquement. L’objectif: reproductibilité et traçabilité.</p>
+      <div class="grid">
+        <div>
+          <h3>Terraform</h3>
+          <pre><code># main.tf
+provider "aws" { region = "eu-west-3" }
+
+resource "aws_s3_bucket" "logs" {
+  bucket = "devops-labs-logs"
+  acl    = "private"
+  versioning { enabled = true }
+  tags = { env = "prod", owner = "platform" }
+}</code></pre>
+        </div>
+        <div>
+          <h3>Ansible</h3>
+          <pre><code># playbook.yml
+- hosts: web
+  become: true
+  tasks:
+    - name: Installer nginx
+      apt: name=nginx state=present update_cache=yes
+    - name: Démarrer nginx
+      service: name=nginx state=started enabled=yes</code></pre>
+        </div>
+        <div>
+          <h3>Docker Compose</h3>
+          <pre><code># compose.yml
+services:
+  web:
+    image: nginx:alpine
+    volumes: [ "./html:/usr/share/nginx/html:ro" ]
+    ports: [ "8080:80" ]
+  api:
+    build: ./api
+    environment:
+      - NODE_ENV=production
+    depends_on: [ db ]
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_PASSWORD=secret
+    volumes: [ "dbdata:/var/lib/postgresql/data" ]
+volumes:
+  dbdata: {}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <span class="badge">Orchestration</span>
+      <h2>Kubernetes – bases</h2>
+      <p>Orchestre des conteneurs à grande échelle: déploiements, mises à jour sans interruption, autoscaling, service discovery.</p>
+      <div class="grid">
+        <div>
+          <h3>Déploiement</h3>
+          <pre><code># deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: web }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: web } }
+  template:
+    metadata: { labels: { app: web } }
+    spec:
+      containers:
+        - name: web
+          image: nginx:alpine
+          ports: [ { containerPort: 80 } ]</code></pre>
+        </div>
+        <div>
+          <h3>Service</h3>
+          <pre><code># service.yaml
+apiVersion: v1
+kind: Service
+metadata: { name: web }
+spec:
+  type: ClusterIP
+  selector: { app: web }
+  ports:
+    - port: 80
+      targetPort: 80</code></pre>
+        </div>
+        <div>
+          <h3>Commandes utiles</h3>
+          <pre><code># Déployer et exposer
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
+kubectl get pods -o wide
+kubectl logs deploy/web</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <span class="badge">Observabilité</span>
+      <h2>Logs, métriques et alertes</h2>
+      <p>L’observabilité rend visibles l’état et la santé des systèmes, pour détecter, diagnostiquer et résoudre vite.</p>
+      <div class="grid">
+        <div>
+          <h3>Logs</h3>
+          <ul>
+            <li><strong>Bon format:</strong> JSON, niveaux (INFO/WARN/ERROR).</li>
+            <li><strong>Centralisation:</strong> Loki/ELK, corrélation par traceId.</li>
+          </ul>
+          <pre><code># Exemple tail/grep
+tail -n 100 app.log | grep -i "error"</code></pre>
+        </div>
+        <div>
+          <h3>Métriques</h3>
+          <ul>
+            <li><strong>Prometheus:</strong> scrape + alerting.</li>
+            <li><strong>Grafana:</strong> dashboards, annotations.</li>
+          </ul>
+          <pre><code># Règle Prometheus
+groups:
+- name: app
+  rules:
+  - alert: HighErrorRate
+    expr: rate(http_requests_total{status=~"5.."}[5m]) &gt; 0.05
+    for: 10m
+    labels: { severity: "critical" }</code></pre>
+        </div>
+        <div>
+          <h3>Traces</h3>
+          <ul>
+            <li><strong>OpenTelemetry:</strong> instrumentation standardisée.</li>
+            <li><strong>Traçage:</strong> latences, dépendances, hotspots.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <span class="badge">Sécurité</span>
+      <h2>DevSecOps – pratiques</h2>
+      <ul>
+        <li><strong>Secrets:</strong> jamais en clair, utiliser vaults/KMS, env vars chiffrées.</li>
+        <li><strong>Supply chain:</strong> scanner dépendances (SCA), images (Trivy), code (SAST).</li>
+        <li><strong>Politiques:</strong> least privilege, MFA, rotation des clés, audit.</li>
+      </ul>
+      <pre><code># Trivy – scan d’image
+trivy image myapp:latest
+
+# GitHub – secret scanning + dépendances
+# Activer dans Settings &gt; Code security and analysis</code></pre>
+    </section>
+
+    <section class="panel">
+      <span class="badge">Pratique guidée</span>
+      <h2>Mini workflow quotidien</h2>
+      <ul>
+        <li><strong>Dev:</strong> branch feature, commit atomiques, tests locaux.</li>
+        <li><strong>CI:</strong> lint, tests, build image, push registry.</li>
+        <li><strong>CD:</strong> déploiement staging, smoke tests, prod après validation.</li>
+        <li><strong>Obs:</strong> vérifier dashboards, logs, alertes après déploiement.</li>
+        <li><strong>Rétro:</strong> postmortems sans blâme, améliorer pipelines et alertes.</li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <span class="badge">Exemples rapides</span>
+      <h2>Snippets utiles</h2>
+      <div class="grid">
+        <div>
+          <h3>Dockerfile (Alpine + healthcheck)</h3>
+          <pre><code>FROM alpine:3.19
+RUN apk add --no-cache curl
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD curl -fsS http://localhost:8080/health || exit 1
+COPY app /app
+WORKDIR /app
+CMD ["./start.sh"]</code></pre>
+        </div>
+        <div>
+          <h3>Makefile (ciblage CI)</h3>
+          <pre><code>IMAGE=registry.example.com/app:$(shell git rev-parse --short HEAD)
+
+build:
+\t docker build -t $(IMAGE) .
+
+push:
+\t docker push $(IMAGE)
+
+test:
+\t npm ci && npm test -- --ci</code></pre>
+        </div>
+        <div>
+          <h3>GitHub Actions (build + push)</h3>
+          <pre><code>name: Build and Push Image
+on: [push]
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/app:latest</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>Tu veux une version avec des TP pas-à-pas (Git, Docker, CI/CD, Kubernetes) adaptée à ton stack actuel ? Dis-moi ce que tu utilises et on la personnalise.</p>
+    </footer>
+  </main>
+</body>
+</html>
