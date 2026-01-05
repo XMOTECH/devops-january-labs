@@ -1,30 +1,44 @@
 #!/bin/bash
 
-# 1. On récupère l'URL passée en argument
-URL=$1
+# ==============================================================================
+# Script      : check_site.sh
+# Description : Surveillance de disponibilité HTTP avec journalisation.
+# Usage       : ./check_site.sh <URL>
+# ==============================================================================
 
-# 2. Vérification : est-ce que l'utilisateur a bien donné une URL ?
+# 1. Configuration des variables
+# On utilise une variable d'environnement pour le log, ou un chemin par défaut
+URL="$1"
+LOG_PATH="${LOG_FILE:-../logs/status.log}"
+DATE=$(date "+%Y-%m-%d %H:%M:%S")
+
+# 2. Vérification de l'argument
 if [ -z "$URL" ]; then
-    echo "Usage: ./check_site.sh <url>"
+    echo "❌ Erreur : URL manquante."
+    echo "Usage  : $0 <https://url-a-tester.com>"
     exit 1
 fi
 
-# 3. On récupère UNIQUEMENT le code HTTP (ex: 200, 404, 500)
-# -s : silencieux (pas de barre de progression)
-# -o /dev/null : on ne veut pas afficher le contenu HTML du site
-# -w : on définit ce qu'on veut afficher à la fin (le code http)
-CODE_HTTP=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+# 3. Test de connectivité avec curl
+# -s : Silencieux
+# -L : Suit les redirections (301, 302) -> Indispensable !
+# -o /dev/null : N'affiche pas le HTML
+# -w : Récupère uniquement le code de retour
+# --connect-timeout : Évite que le script reste bloqué si le site est lent
+CODE_HTTP=$(curl -s -L -o /dev/null -w "%{http_code}" --connect-timeout 10 "$URL")
 
-# 4. On récupère la date actuelle pour les logs
-DATE=$(date "+%Y-%m-%d %H:%M:%S")
-
-# 5. Logique de décision
-if ["$CODE_HTTP" -eq 200 ]; then
-    RESULT=" [OK] Le site $URL répond bien (Code: $CODE_HTTP)"
+# 4. Analyse du code de retour
+if [ "$CODE_HTTP" -eq 200 ]; then
+    RESULT="✅ [OK] Le site $URL est opérationnel (Code: $CODE_HTTP)"
+elif [ "$CODE_HTTP" -eq 000 ]; then
+    RESULT="❌ [CRITICAL] Impossible de contacter le serveur $URL"
 else
-    RESULT=" [ALERTE] Le site $URL est en panne ou inaccessible (Code: $CODE_HTTP)"
+    RESULT="⚠️ [WARNING] Le site $URL a répondu avec un code inhabituel (Code: $CODE_HTTP)"
 fi
 
-# 6. Affichage à l'écran ET enregistrement dans le fichier de logs
-echo "$RESULT"
-echo "[$DATE] $RESULT" >> ../logs/status.log
+# 5. Sortie console et Journalisation
+# On s'assure que le dossier des logs existe
+mkdir -p "$(dirname "$LOG_PATH")"
+
+echo "[$DATE] $RESULT"
+echo "[$DATE] $RESULT" >> "$LOG_PATH"
