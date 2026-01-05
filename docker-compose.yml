@@ -1,5 +1,4 @@
 services:
-  # Ton ancien service de monitoring
   checker:
     build: .
     image: uptime-checker:latest
@@ -7,7 +6,6 @@ services:
       - ./logs:/logs
     command: ["https://www.google.com"]
 
-  # Ton nouveau service Web
   webapp:
     image: nginx:alpine
     ports:
